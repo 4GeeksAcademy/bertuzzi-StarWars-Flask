@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-class Users(db.Model):
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
@@ -22,3 +22,33 @@ class Users(db.Model):
             # This is what we send to the front as a dictionary
             # The serialize method allows us give back the specific information we want to return to the front, for instance by means of an endpoint
         }
+
+class Planet(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    population = db.Column(db.Integer,nullable=False)
+    diameter = db.Column(db.Integer,nullable=False)
+    climate = db.Column(db.String(50),nullable=False)
+    terrain = db.Column(db.String(50),nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name
+        }
+
+class Charachter(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50),nullable=False)
+    gender = db.Column(db.String(50),nullable=False)
+    birth_year = db.Column(db.Integer,nullable=False)
+    homeworld = db.Column(db.String(50),nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name
+        }
+
+class Favorite(db.Model):
+    id = db.Column(db.Integer, primary_key=True) 
