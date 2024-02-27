@@ -18,6 +18,7 @@ class User(db.Model):
         return {
             "id": self.id,
             "email": self.email,
+            "is_active": self.is_active
             # do not serialize the password, its a security breach
             # This is what we send to the front as a dictionary
             # The serialize method allows us give back the specific information we want to return to the front, for instance by means of an endpoint
@@ -29,7 +30,6 @@ class Planet(db.Model):
     population = db.Column(db.Integer,nullable=False)
     diameter = db.Column(db.Integer,nullable=False)
     climate = db.Column(db.String(50),nullable=False)
-    terrain = db.Column(db.String(50),nullable=False)
 
     def serialize(self):
         return {
@@ -43,12 +43,33 @@ class Charachter(db.Model):
     gender = db.Column(db.String(50),nullable=False)
     birth_year = db.Column(db.Integer,nullable=False)
     homeworld = db.Column(db.String(50),nullable=False)
-
+    
     def serialize(self):
         return {
             "id": self.id,
             "name": self.name
         }
 
-class Favorite(db.Model):
-    id = db.Column(db.Integer, primary_key=True) 
+class FavoritePlanet(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    planet_id = db.Column(db.Integer)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "planet_id": self.planet_id
+        }
+
+class FavoriteCharacter(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    character_id = db.Column(db.Integer)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "character_id": self.character_id
+        }

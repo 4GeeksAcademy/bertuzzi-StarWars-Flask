@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User,Charachter,Planet,Favorite
+from models import db, User,Charachter,Planet,FavoritePlanet,FavoriteCharacter
 #from models import Person
 
 # Flask instance
@@ -80,6 +80,83 @@ def get_plan(id):
     response_body['res'] = results['res'] = plan
     response_body['message'] = results['message'] = 'GET request of planet ' + str(id)
     return response_body,200
+
+@app.route('/users', methods=['GET'])
+def get_users():
+    response_body = results = {}
+    users = db.session.execute(db.select(User)).scalars()
+    results['users'] = [row.serialize() for row in users]
+    response_body['res'] = results['users']
+    response_body['message'] = 'GET request for users'
+    return response_body,200
+
+@app.route('/users/favorites',methods=['GET'])
+def get_favorites():
+    response_body = results = {}
+    active_user = []
+    all_users = db.session.execute(db.select(User)).scalars()
+    users = [row.serialize() for row in all_users]
+    for x in users:
+        if x.is_active == True:
+            id = x.id
+            favorite_characters = db.session.execute(db.select(FavoriteCharacter).where(FavoriteCharacter.user_id == id)).scalars()
+            fav_char = favorite_characters.serialize()
+            active_user.append(fav_char.favorite_characters)
+            favorite_planets = db.session.execute(db.select(FavoritePlanet).where(FavoritePlanet.user_id == id)).scalars()
+            fav_plan = favorite_planets.serialize()
+            active_user.append(fav_plan.favorite_planets)
+        else:
+            return
+    response_body['res'] = results['res'] = active_user
+    response_body['message'] = results['message'] = 'GET request for favorites of active users'
+    return response_body,200
+
+@app.route('/favorite/planet/<int:id>',methods=['POST','DELETE'])
+def handle_fav_planet(id):
+    response_body = results = {}
+    if request.method == 'POST':
+        data = request.json
+        favorite_planet = FavoritePlanet(
+                user_id = data['user_id'],
+                planet_id = id
+            )
+        db.session.add(favorite_planet)
+        db.session.commit()
+        response_body['res'] = results['res'] = favorite_planet.serialize()
+        response_body['message'] = results['message'] = 'Favorite planet added. Planet id: ' + str(id)
+        return response_body,200
+    if request.method == 'DELETE':
+        planet = db.session.execute(db.select(FavoritePlanet).where(FavoritePlanet.planet_id == id )).scalar()
+        db.session.delete(planet)
+        db.session.commit()
+        favorites = db.session.execute(db.select(FavoritePlanet)).scalars()
+        response_body['res'] = results['res'] = [row.serialize() for row in favorites]
+        response_body['message'] = results['message'] = 'planet id number ' + str(id) + ' deleted successfully!'
+        return response_body,200
+@app.route('/favorite/people/<int:id>',methods=['POST','DELETE'])
+def handle_fav_characters(id):
+        response_body = results = {}
+        if request.method == 'POST':
+            data = request.json
+            favorite_character = FavoriteCharacter(
+                    user_id = data['user_id'],
+                    character_id = id
+                )
+            db.session.add(favorite_character)
+            db.session.commit()
+            response_body['res'] = results['res'] = favorite_character.serialize()
+            response_body['message'] = results['message'] = 'Favorite character added. Character id: ' + str(id)
+            return response_body,200
+        if request.method == 'DELETE':
+            character = db.session.execute(db.select(FavoriteCharacter).where(FavoriteCharacter.character_id == id )).scalar()
+            db.session.delete(character)
+            db.session.commit()
+            favorites = db.session.execute(db.select(FavoriteCharacter)).scalars()
+            response_body['res'] = results['res'] = [row.serialize() for row in favorites]
+            response_body['message'] = results['message'] = 'character id number ' + str(id) + ' deleted successfully!'
+            return response_body,200
+         
+
 
 
     
