@@ -97,19 +97,19 @@ def get_favorites():
     all_users = db.session.execute(db.select(User)).scalars()
     users = [row.serialize() for row in all_users]
     for x in users:
-        if x.is_active == True:
-            id = x.id
+        if x['is_active'] == True:
+            id = x['id']
             favorite_characters = db.session.execute(db.select(FavoriteCharacter).where(FavoriteCharacter.user_id == id)).scalars()
-            fav_char = favorite_characters.serialize()
-            active_user.append(fav_char.favorite_characters)
+            fav_char = [row.serialize() for row in favorite_characters]
+            [active_user.append(char) for char in fav_char]
             favorite_planets = db.session.execute(db.select(FavoritePlanet).where(FavoritePlanet.user_id == id)).scalars()
-            fav_plan = favorite_planets.serialize()
-            active_user.append(fav_plan.favorite_planets)
+            fav_plan = [row.serialize() for row in favorite_planets]
+            [active_user.append(plan) for plan in fav_plan]
+            response_body['res'] = results['res'] = active_user
+            response_body['message'] = results['message'] = 'GET request for favorites of active users'
+            return response_body,200
         else:
             return
-    response_body['res'] = results['res'] = active_user
-    response_body['message'] = results['message'] = 'GET request for favorites of active users'
-    return response_body,200
 
 @app.route('/favorite/planet/<int:id>',methods=['POST','DELETE'])
 def handle_fav_planet(id):
@@ -133,6 +133,7 @@ def handle_fav_planet(id):
         response_body['res'] = results['res'] = [row.serialize() for row in favorites]
         response_body['message'] = results['message'] = 'planet id number ' + str(id) + ' deleted successfully!'
         return response_body,200
+
 @app.route('/favorite/people/<int:id>',methods=['POST','DELETE'])
 def handle_fav_characters(id):
         response_body = results = {}

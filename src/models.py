@@ -5,14 +5,14 @@ db = SQLAlchemy()
 
 
 class User(db.Model):
+    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
-
     # Def allows us to represent 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User %r>' % self.email
 
     def serialize(self):
         return {
@@ -25,6 +25,7 @@ class User(db.Model):
         }
 
 class Planet(db.Model):
+    __tablename__='planets'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     population = db.Column(db.Integer,nullable=False)
@@ -38,6 +39,7 @@ class Planet(db.Model):
         }
 
 class Charachter(db.Model):
+    __tablename__='characters'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50),nullable=False)
     gender = db.Column(db.String(50),nullable=False)
@@ -51,9 +53,12 @@ class Charachter(db.Model):
         }
 
 class FavoritePlanet(db.Model):
+    __tablename__='favorite_planets'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
-    planet_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    planet_id = db.Column(db.Integer, db.ForeignKey('planets.id'))
+    user = db.relationship('User',foreign_keys=[user_id])
+    planet = db.relationship('Planet', foreign_keys=[planet_id])
 
     def serialize(self):
         return {
@@ -63,9 +68,12 @@ class FavoritePlanet(db.Model):
         }
 
 class FavoriteCharacter(db.Model):
+    __tablename__='favorite_characters'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
-    character_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    character_id = db.Column(db.Integer, db.ForeignKey('characters.id'))
+    user = db.relationship('User',foreign_keys=[user_id])
+    character = db.relationship('Charachter', foreign_keys=[character_id])
 
     def serialize(self):
         return {
