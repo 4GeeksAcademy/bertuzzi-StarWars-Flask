@@ -90,26 +90,19 @@ def get_users():
     response_body['message'] = 'GET request for users'
     return response_body,200
 
-@app.route('/users/favorites',methods=['GET'])
-def get_favorites():
+@app.route('/users/<int:id>/favorites',methods=['GET'])
+def get_favorites(id):
     response_body = results = {}
-    active_user = []
-    all_users = db.session.execute(db.select(User)).scalars()
-    users = [row.serialize() for row in all_users]
-    for x in users:
-        if x['is_active'] == True:
-            id = x['id']
-            favorite_characters = db.session.execute(db.select(FavoriteCharacter).where(FavoriteCharacter.user_id == id)).scalars()
-            fav_char = [row.serialize() for row in favorite_characters]
-            [active_user.append(char) for char in fav_char]
-            favorite_planets = db.session.execute(db.select(FavoritePlanet).where(FavoritePlanet.user_id == id)).scalars()
-            fav_plan = [row.serialize() for row in favorite_planets]
-            [active_user.append(plan) for plan in fav_plan]
-            response_body['res'] = results['res'] = active_user
-            response_body['message'] = results['message'] = 'GET request for favorites of active users'
-            return response_body,200
-        else:
-            return
+    favorites = []
+    favorite_characters = db.session.execute(db.select(FavoriteCharacter).where(FavoriteCharacter.user_id == id)).scalars()
+    fav_char = [row.serialize() for row in favorite_characters]
+    [favorites.append(char) for char in fav_char]
+    favorite_planets = db.session.execute(db.select(FavoritePlanet).where(FavoritePlanet.user_id == id)).scalars()
+    fav_plan = [row.serialize() for row in favorite_planets]
+    [favorites.append(plan) for plan in fav_plan]
+    response_body['res'] = results['res'] = favorites
+    response_body['message'] = results['message'] = 'GET request for favorites of active users'
+    return response_body,200
 
 @app.route('/favorite/planet/<int:id>',methods=['POST','DELETE'])
 def handle_fav_planet(id):

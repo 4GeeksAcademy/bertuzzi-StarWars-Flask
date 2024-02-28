@@ -12,7 +12,7 @@ class User(db.Model):
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
     # Def allows us to represent 
     def __repr__(self):
-        return '<User %r>' % self.email
+        return f'<User {self.id} {self.email}>' 
 
     def serialize(self):
         return {
@@ -32,6 +32,9 @@ class Planet(db.Model):
     diameter = db.Column(db.Integer,nullable=False)
     climate = db.Column(db.String(50),nullable=False)
 
+    def __repr__(self):
+        return f'<Planet {self.id} {self.name}>' 
+
     def serialize(self):
         return {
             "id": self.id,
@@ -45,6 +48,9 @@ class Charachter(db.Model):
     gender = db.Column(db.String(50),nullable=False)
     birth_year = db.Column(db.Integer,nullable=False)
     homeworld = db.Column(db.String(50),nullable=False)
+
+    def __repr__(self):
+        return f'<Character {self.id} {self.name}>' 
     
     def serialize(self):
         return {
