@@ -104,54 +104,55 @@ def get_favorites(id):
     response_body['message'] = results['message'] = 'GET request for favorites of active users'
     return response_body,200
 
-@app.route('/favorite/planet/<int:id>',methods=['POST','DELETE'])
+@app.route('/favorite/<int:id>/planets',methods=['POST'])
 def handle_fav_planet(id):
     response_body = results = {}
-    if request.method == 'POST':
-        data = request.json
-        favorite_planet = FavoritePlanet(
-                user_id = data['user_id'],
-                planet_id = id
-            )
-        db.session.add(favorite_planet)
-        db.session.commit()
-        response_body['res'] = results['res'] = favorite_planet.serialize()
-        response_body['message'] = results['message'] = 'Favorite planet added. Planet id: ' + str(id)
-        return response_body,200
-    if request.method == 'DELETE':
-        planet = db.session.execute(db.select(FavoritePlanet).where(FavoritePlanet.planet_id == id )).scalar()
-        db.session.delete(planet)
-        db.session.commit()
-        favorites = db.session.execute(db.select(FavoritePlanet)).scalars()
-        response_body['res'] = results['res'] = [row.serialize() for row in favorites]
-        response_body['message'] = results['message'] = 'planet id number ' + str(id) + ' deleted successfully!'
-        return response_body,200
+    data = request.json
+    favorite_planet = FavoritePlanet(
+        user_id = id,
+        planet_id = data['planet_id']
+        )
+    db.session.add(favorite_planet)
+    db.session.commit()
+    response_body['res'] = results['res'] = favorite_planet.serialize()
+    response_body['message'] = results['message'] = 'Favorite planet added. Planet id: ' + str(data['planet_id'])
+    return response_body,200
 
-@app.route('/favorite/people/<int:id>',methods=['POST','DELETE'])
-def handle_fav_characters(id):
-        response_body = results = {}
-        if request.method == 'POST':
-            data = request.json
-            favorite_character = FavoriteCharacter(
-                    user_id = data['user_id'],
-                    character_id = id
-                )
-            db.session.add(favorite_character)
-            db.session.commit()
-            response_body['res'] = results['res'] = favorite_character.serialize()
-            response_body['message'] = results['message'] = 'Favorite character added. Character id: ' + str(id)
-            return response_body,200
-        if request.method == 'DELETE':
-            character = db.session.execute(db.select(FavoriteCharacter).where(FavoriteCharacter.character_id == id )).scalar()
-            db.session.delete(character)
-            db.session.commit()
-            favorites = db.session.execute(db.select(FavoriteCharacter)).scalars()
-            response_body['res'] = results['res'] = [row.serialize() for row in favorites]
-            response_body['message'] = results['message'] = 'character id number ' + str(id) + ' deleted successfully!'
-            return response_body,200
-         
+@app.route('/favorite/<int:user_id>/planets/<int:planet_id>',methods=['DELETE'])
+def delete_fav_planet(user_id,planet_id):
+    response_body = results = {}
+    planet = db.session.execute(db.select(FavoritePlanet).where((FavoritePlanet.planet_id == planet_id )&(FavoritePlanet.user_id == user_id))).scalar()
+    db.session.delete(planet)
+    db.session.commit()
+    favorites = db.session.execute(db.select(FavoritePlanet)).scalars()
+    response_body['res'] = results['res'] = [row.serialize() for row in favorites]
+    response_body['message'] = results['message'] = 'planet id number ' + str(planet_id) + ' deleted successfully!'
+    return response_body,200
 
+@app.route('/favorite/<int:id>/people',methods=['POST'])
+def handle_fav_char(id):
+    response_body = results = {}
+    data = request.json
+    favorite_character = FavoriteCharacter(
+        user_id = id,
+        character_id = data['character_id']
+        )
+    db.session.add(favorite_character)
+    db.session.commit()
+    response_body['res'] = results['res'] = favorite_character.serialize()
+    response_body['message'] = results['message'] = 'Favorite character added. Character id: ' + str(data['character_id'])
+    return response_body,200
 
+@app.route('/favorite/<int:user_id>/people/<int:person_id>',methods=['DELETE'])
+def delete_fav_char(user_id,person_id):
+    response_body = results = {}
+    character = db.session.execute(db.select(FavoriteCharacter).where((FavoriteCharacter.character_id == character_id )&(FavoriteCharacter.user_id == user_id))).scalar()
+    db.session.delete(character)
+    db.session.commit()
+    favorites = db.session.execute(db.select(FavoriteCharacter)).scalars()
+    response_body['res'] = results['res'] = [row.serialize() for row in favorites]
+    response_body['message'] = results['message'] = 'character id number ' + str(person_id) + ' deleted successfully!'
+    return response_body,200
 
     
 
